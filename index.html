@@ -338,18 +338,32 @@
   </div>
 
   <script>
-    // ⚠️ 이 토큰은 본인만 사용하는 페이지에서만 사용하세요
-    const ACCESS_TOKEN = 'sl.u.AGVXJiL3rhNrtNrqbBD8txPEtapVbn6r4TgqLdgyDamsIwLNQuhneeGwcBqAvzvMsIy0GJ41KTFD6NKXKRPXk03Hw9l5uvR9MsmdLNA2gJBgzFybJTFGGlfKTOLLmTBA2PIavgrQyM9bit9GiaxQjw6p2YtXgoMdruMC1zisrjPnZVvDYUSW0cLhNjyU28MvmftX6wTwrnE-wBd2I6n-ATg21pAJpVLL8rCjgMGPwJjaK86COeUDPEAVTuMlRtJk0M7hmpAWQXEGzQlaIEHZ0jMZrp9Wn8lvTNr3mu7JdTwGuXGB1xTts98ZQorFFsseXqSlP9RkbsEx2rdxqwMqBK5-ExxzifjE3hlq51A2WZrEXoHdKuDwSHddEFHMh2SnOrYoSsUeNfnQWWttTdgVj3uRFsNGFdCgwbWjkveVqNjx7KumOCfVmB0oCu5AClgMQR5GPbIDBz65RMjNVTdaRz-3hhunO2Lk_nsnDWb71eRZ1N__B7W04_lpTLFTpcz34YRokrUj4K_k4c8qBGjpS4-0xg4v1DOk5n1BYpZyCHDyRCek7I3_QA4bpC7nOKw8w-KMIEHStbkCYrkdHNjWbqBsqOtkRnPP4-DmQgI7AbIN93UfB4F5xc22xyJ5xh7lzOZFj2I8LEQxk3XlBp97jfz2NtTMx-3QN1mXxKUILLBP1V1qmqBeFDTdtBazx37RLVNWhMXkfZy-1Nub3XJAcqcuX57QsPujKiawm_APgkY4Luqv74_H5aACftgHPMfgFv22ZM3ZO0aevecDyXgt4vQbdsv1kP9dKRrlZq9jBeY-bo5UmXVHnQVDINWSqshRAv2FqifdDFSp9JgTjyg7g4fQaXJwwlFt0BGfEcO2MxZJ5zZEtWSJBlsm5oGlWfwPeSwYEIwITUuZU8jssYx8wVgMcp-6KOHgs806Rz4rw8qpLZqdhujP-6i4NTd4P95yDQMq8Bbjhf2UJ2e1Z-nvVPxZ1wAk6FYAeA3_fSO8wP6iq93S54BGvIfiYde3SKGaScEP4QhEr1IwV4F3F17xkDOYs_sObzyFPBpggGTf3p9BrYgSCphYlulZ3PNevh1XdXOq8_Hd3ELWhzprfDhYRQjUrSnjf2q49RjnU0P_vEZMW9Je48Ea4OBH4WB6MzO71Z7PTB6cCCL7OQQdjYywfeAYWTpYn6wXp2wvSzhZODe00_zs63CimwaRR6ljttkj2MFx6fIY9fXOuBTJUKb4r6BVxWXwxw6zj7cc3UlYBzAeJtseUqF0TUmUZna_3uNalHBuPmzF9uIxaWoraVSJZ1j7Klmrq3zTQ0j-Z0S-Q1HBpwL605KHbPVwA0fK3-CfzCw';
+    const CLIENT_ID = 'kmdebnypv4oe50u';
+    const CLIENT_SECRET = 'tdlnvo7uk7npcjm';
+    const REFRESH_TOKEN = 'jKkdy01X72gAAAAAAAAAAcxK3ZoqyY6hwOY_x4RIrwGidFIKJ6e4n0h2Umway9L5';
     const FOLDER_PATH = '';
+
+    let accessToken = null;
+
+    async function getAccessToken() {
+      const res = await fetch('https://api.dropbox.com/oauth2/token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `grant_type=refresh_token&refresh_token=${REFRESH_TOKEN}&client_id=${CLIENT_ID}&client_secret=${CLIENT_SECRET}`
+      });
+      const data = await res.json();
+      accessToken = data.access_token;
+    }
 
     async function loadFiles() {
       const container = document.getElementById('file-list');
 
       try {
+        await getAccessToken();
         const response = await fetch('https://api.dropboxapi.com/2/files/list_folder', {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${ACCESS_TOKEN}`,
+            'Authorization': `Bearer ${accessToken}`,
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({ path: FOLDER_PATH })
@@ -444,10 +458,11 @@
         const btn = document.querySelector(`[data-path="${path}"]`);
         if (btn) { btn.textContent = '...'; btn.disabled = true; }
 
+        await getAccessToken();
         const res = await fetch('https://api.dropboxapi.com/2/files/get_temporary_link', {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${ACCESS_TOKEN}`,
+            'Authorization': `Bearer ${accessToken}`,
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({ path })
