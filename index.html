@@ -7,6 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;700&family=Cinzel:wght@600;800&display=swap" rel="stylesheet"/>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
     :root {
       --bg: #0a0a0f;
       --surface: #12121a;
@@ -16,6 +17,7 @@
       --text: #e8e0d0;
       --muted: #7a7070;
     }
+
     body {
       background: var(--bg);
       color: var(--text);
@@ -28,6 +30,8 @@
       position: relative;
       overflow-x: hidden;
     }
+
+    /* Starfield background */
     body::before {
       content: '';
       position: fixed;
@@ -37,10 +41,14 @@
         radial-gradient(1px 1px at 80% 10%, rgba(255,255,255,0.15) 0%, transparent 100%),
         radial-gradient(1px 1px at 50% 70%, rgba(255,255,255,0.1) 0%, transparent 100%),
         radial-gradient(1px 1px at 10% 80%, rgba(201,168,76,0.2) 0%, transparent 100%),
-        radial-gradient(1px 1px at 90% 60%, rgba(255,255,255,0.12) 0%, transparent 100%);
+        radial-gradient(1px 1px at 90% 60%, rgba(255,255,255,0.12) 0%, transparent 100%),
+        radial-gradient(2px 2px at 35% 15%, rgba(201,168,76,0.15) 0%, transparent 100%),
+        radial-gradient(1px 1px at 65% 45%, rgba(255,255,255,0.08) 0%, transparent 100%);
       pointer-events: none;
       z-index: 0;
     }
+
+    /* Ambient glow */
     body::after {
       content: '';
       position: fixed;
@@ -53,22 +61,27 @@
       pointer-events: none;
       z-index: 0;
     }
+
     .container {
       position: relative;
       z-index: 1;
       width: 100%;
       max-width: 680px;
     }
+
+    /* Header */
     header {
       text-align: center;
       margin-bottom: 56px;
       animation: fadeDown 0.8s ease both;
     }
+
     .logo-wrap {
       display: flex;
       justify-content: center;
       margin-bottom: 8px;
     }
+
     .logo-img {
       width: 100%;
       max-width: 100%;
@@ -77,18 +90,43 @@
       animation: logoPulse 3s ease-in-out infinite;
       display: block;
     }
+
     @keyframes logoPulse {
       0%, 100% { box-shadow: 0 0 40px rgba(201,168,76,0.25), 0 0 80px rgba(201,168,76,0.1); }
       50% { box-shadow: 0 0 60px rgba(201,168,76,0.45), 0 0 100px rgba(201,168,76,0.2); }
     }
-    .page-subtitle {
-      font-family: 'Cinzel', serif;
-      font-size: 16px;
-      letter-spacing: 0.25em;
-      color: var(--gold-light);
-      margin-top: 16px;
-      text-shadow: 0 0 20px rgba(201,168,76,0.4);
+
+    .symbol {
+      font-size: 42px;
+      margin-bottom: 16px;
+      display: block;
+      filter: drop-shadow(0 0 12px rgba(201,168,76,0.5));
+      animation: pulse 3s ease-in-out infinite;
     }
+
+    @keyframes pulse {
+      0%, 100% { filter: drop-shadow(0 0 12px rgba(201,168,76,0.5)); }
+      50% { filter: drop-shadow(0 0 24px rgba(201,168,76,0.9)); }
+    }
+
+    h1 {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(28px, 5vw, 42px);
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      color: var(--gold-light);
+      text-shadow: 0 0 30px rgba(201,168,76,0.4);
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      font-size: 14px;
+      color: var(--muted);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+    }
+
+    /* Divider */
     .divider {
       display: flex;
       align-items: center;
@@ -105,12 +143,18 @@
     .divider::after {
       background: linear-gradient(to left, transparent, var(--gold));
     }
-    .divider span { color: var(--gold); font-size: 16px; }
+    .divider span {
+      color: var(--gold);
+      font-size: 16px;
+    }
+
+    /* File list */
     #file-list {
       display: flex;
       flex-direction: column;
       gap: 12px;
     }
+
     .file-card {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -125,6 +169,7 @@
       position: relative;
       overflow: hidden;
     }
+
     .file-card::before {
       content: '';
       position: absolute;
@@ -134,11 +179,34 @@
       opacity: 0;
       transition: opacity 0.3s;
     }
-    .file-card:hover { border-color: rgba(201,168,76,0.4); box-shadow: 0 4px 24px rgba(0,0,0,0.4); }
-    .file-card:hover::before { opacity: 1; }
-    .file-info { flex: 1; min-width: 0; }
-    .file-name { font-size: 14px; font-weight: 700; color: var(--text); word-break: break-all; margin-bottom: 4px; }
-    .file-size { font-size: 12px; color: var(--muted); }
+
+    .file-card:hover {
+      border-color: rgba(201,168,76,0.4);
+      box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+    }
+
+    .file-card:hover::before {
+      opacity: 1;
+    }
+
+    .file-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .file-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+      word-break: break-all;
+      margin-bottom: 4px;
+    }
+
+    .file-size {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
     .download-btn {
       flex-shrink: 0;
       background: transparent;
@@ -154,8 +222,14 @@
       transition: background 0.3s, color 0.3s, box-shadow 0.3s;
       white-space: nowrap;
     }
-    .download-btn:hover { background: var(--gold); color: var(--bg); box-shadow: 0 0 16px rgba(201,168,76,0.4); }
-    .download-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .download-btn:hover {
+      background: var(--gold);
+      color: var(--bg);
+      box-shadow: 0 0 16px rgba(201,168,76,0.4);
+    }
+
+    /* Loading */
     .loading {
       text-align: center;
       padding: 60px 20px;
@@ -163,6 +237,7 @@
       font-size: 14px;
       letter-spacing: 0.1em;
     }
+
     .loading-spinner {
       width: 32px;
       height: 32px;
@@ -172,10 +247,51 @@
       animation: spin 1s linear infinite;
       margin: 0 auto 16px;
     }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .error { text-align: center; padding: 40px 20px; color: #c06060; font-size: 14px; }
-    .empty { text-align: center; padding: 60px 20px; color: var(--muted); font-size: 14px; }
-    .section { margin-bottom: 32px; }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Error */
+    .error {
+      text-align: center;
+      padding: 40px 20px;
+      color: #c06060;
+      font-size: 14px;
+    }
+
+    /* Empty */
+    .empty {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    /* Footer */
+    footer {
+      margin-top: 56px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: 0.15em;
+      animation: fadeUp 1s ease 0.5s both;
+    }
+
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .section {
+      margin-bottom: 32px;
+    }
+
     .section-title {
       font-family: 'Noto Serif KR', serif;
       font-size: 32px;
@@ -189,22 +305,26 @@
       box-shadow: inset 0 0 20px rgba(201,168,76,0.05), 0 0 20px rgba(201,168,76,0.08);
       letter-spacing: 0.05em;
     }
-    footer { margin-top: 56px; text-align: center; color: var(--muted); font-size: 12px; letter-spacing: 0.15em; animation: fadeUp 1s ease 0.5s both; }
-    @keyframes fadeDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+    .version-label {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--gold-light);
+      letter-spacing: 0.08em;
+      margin: 20px 0 10px;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <header>
       <div class="logo-wrap">
-        <img src="" style="display:none" alt="logo" class="logo-img"/>
+        <img src="" style="display:none" alt="時空術 Magician" class="logo-img"/>
         <div id="logo-fallback" style="display:none; text-align:center; padding: 20px 0;">
           <div style="font-family: 'Noto Serif KR', serif; font-size: clamp(36px, 8vw, 64px); font-weight: 700; color: #e8c97a; text-shadow: 0 0 30px rgba(201,168,76,0.5); letter-spacing: 0.05em; line-height: 1.2;">時空術 Magician</div>
           <div style="font-family: 'Noto Serif KR', serif; font-size: clamp(16px, 3vw, 24px); color: #e8e0d0; margin-top: 12px; letter-spacing: 0.08em;">도서출판 역리원 (02-396-0841)</div>
         </div>
       </div>
-      <p class="page-subtitle">PLAYER DOWNLOAD</p>
     </header>
 
     <div class="divider"><span>✦</span></div>
@@ -217,14 +337,14 @@
     </div>
 
     <footer>
-      <p>© 도서출판 역리원 · Magician Player</p>
+      <p>© 도서출판 역리원 · 時空術 Magician</p>
     </footer>
   </div>
 
   <script>
-    const CLIENT_ID = 'uge8w7eabqu19pv';
-    const CLIENT_SECRET = 'rrs2v0lb229j6po';
-    const REFRESH_TOKEN = 'BcEtOAKf76IAAAAAAAAAAUvhYBw7a692H6YmzPE9qo_yVIBxgoPDgJFwRRpVXj3H';
+    const CLIENT_ID = 'kmdebnypv4oe50u';
+    const CLIENT_SECRET = 'tdlnvo7uk7npcjm';
+    const REFRESH_TOKEN = 'jKkdy01X72gAAAAAAAAAAcxK3ZoqyY6hwOY_x4RIrwGidFIKJ6e4n0h2Umway9L5';
     const FOLDER_PATH = '';
 
     let accessToken = null;
@@ -255,7 +375,7 @@
         const logoImg = document.querySelector('.logo-img');
         if (logoImg) {
           logoImg.src = data.link;
-          logoImg.style.display = "block";
+          logoImg.style.display = 'block';
           const fallback = document.getElementById('logo-fallback');
           if (fallback) fallback.style.display = 'none';
         }
@@ -264,8 +384,9 @@
       }
     }
 
-    async function loadFiles() {
+        async function loadFiles() {
       const container = document.getElementById('file-list');
+
       try {
         await getAccessToken();
         const response = await fetch('https://api.dropboxapi.com/2/files/list_folder', {
@@ -277,14 +398,15 @@
           body: JSON.stringify({ path: FOLDER_PATH })
         });
 
-        if (!response.ok) throw new Error(`API 오류: ${response.status}`);
+        if (!response.ok) {
+          throw new Error(`API 오류: ${response.status}`);
+        }
 
         const data = await response.json();
-
-        // 로고 파일 찾기 (파일명에 'logo' 포함된 png/jpg)
-        const logoFile = data.entries.find(e => 
-          e['.tag'] === 'file' && 
-          /logo/i.test(e.name) && 
+        // 로고 파일 찾기
+        const logoFile = data.entries.find(e =>
+          e['.tag'] === 'file' &&
+          /logo/i.test(e.name) &&
           /\.(png|jpg|jpeg)$/i.test(e.name)
         );
         if (logoFile) {
@@ -294,9 +416,9 @@
           if (fallback) fallback.style.display = 'block';
         }
 
-        // 로고 파일 제외하고 나머지만 표시
-        const files = data.entries.filter(e => 
-          e['.tag'] === 'file' && 
+        // 로고 파일 제외
+        const files = data.entries.filter(e =>
+          e['.tag'] === 'file' &&
           !(/logo/i.test(e.name) && /\.(png|jpg|jpeg)$/i.test(e.name))
         );
 
@@ -307,27 +429,63 @@
 
         container.innerHTML = '';
 
-        // 타이틀 박스
-        const section = document.createElement('div');
-        section.className = 'section';
-        section.innerHTML = '<div class="section-title">도서출판역리원 Magician Player</div>';
-        container.appendChild(section);
+        // 분류
+        const yeokrywon = files.filter(f => f.name.includes('도서출판역리원') || f.name.includes('도서출판역리원'));
+        const koryeo = files.filter(f => f.name.includes('고려기문학회'));
 
-        files.forEach((file, i) => {
-          const sizeText = formatSize(file.size);
-          const card = document.createElement('div');
-          card.className = 'file-card';
-          card.style.animationDelay = `${i * 0.08}s`;
-          card.innerHTML = `
-            <div class="file-info">
-              <div class="file-name">${file.name}</div>
-              <div class="file-size">${sizeText}</div>
-            </div>
-            <button class="download-btn" data-path="${file.path_lower}" data-name="${file.name}">DOWNLOAD</button>
-          `;
-          card.querySelector('.download-btn').addEventListener('click', () => downloadFile(file.path_lower, file.name));
-          container.appendChild(card);
-        });
+        function getVersion(name) {
+          if (name.includes('_4.')) return '4대';
+          if (name.includes('_3.')) return '3대';
+          return '기타';
+        }
+
+        function renderSection(title, fileList, startIdx) {
+          if (fileList.length === 0) return;
+
+          const section = document.createElement('div');
+          section.className = 'section';
+          section.innerHTML = `<div class="section-title">${title}</div>`;
+
+          // 버전별 그룹
+          const v3 = fileList.filter(f => getVersion(f.name) === '3대');
+          const v4 = fileList.filter(f => getVersion(f.name) === '4대');
+
+          function renderGroup(label, group, offset) {
+            if (group.length === 0) return;
+            const groupDiv = document.createElement('div');
+            groupDiv.innerHTML = `<div class="version-label">${label}</div>`;
+            group.forEach((file, i) => {
+              const sizeText = formatSize(file.size);
+              const card = document.createElement('div');
+              card.className = 'file-card';
+              card.style.animationDelay = `${(offset + i) * 0.08}s`;
+              card.innerHTML = `
+                <div class="file-info">
+                  <div class="file-name">${file.name}</div>
+                  <div class="file-size">${sizeText}</div>
+                </div>
+                <button class="download-btn" data-path="${file.path_lower}" data-name="${file.name}">DOWNLOAD</button>
+              `;
+              card.querySelector('.download-btn').addEventListener('click', () => downloadFile(file.path_lower, file.name));
+              groupDiv.appendChild(card);
+            });
+            section.appendChild(groupDiv);
+          }
+
+          renderGroup('일반 버전 (ver.3)', v3, startIdx);
+          renderGroup('프로 버전 (ver.4)', v4, startIdx + v3.length);
+          container.appendChild(section);
+        }
+
+        renderSection('도서출판 역리원', yeokrywon, 0);
+
+        if (koryeo.length > 0) {
+          const divider = document.createElement('div');
+          divider.className = 'divider';
+          divider.innerHTML = '<span>✦</span>';
+          container.appendChild(divider);
+          renderSection('고려기문학회', koryeo, yeokrywon.length);
+        }
 
       } catch (err) {
         container.innerHTML = `<div class="error">⚠️ 파일을 불러올 수 없습니다.<br><small>${err.message}</small></div>`;
