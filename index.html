@@ -422,6 +422,12 @@
           !(/logo/i.test(e.name) && /\.(png|jpg|jpeg)$/i.test(e.name))
         );
 
+        // 버전 추출 함수
+        function getVer(name) {
+          const m = name.match(/_(\d+\.\d+)/);
+          return m ? parseFloat(m[1]) : 0;
+        }
+
         if (files.length === 0) {
           container.innerHTML = '<div class="empty">파일이 없습니다.</div>';
           return;
@@ -430,8 +436,8 @@
         container.innerHTML = '';
 
         // 분류
-        const yeokrywon = files.filter(f => f.name.includes('도서출판역리원') || f.name.includes('도서출판역리원'));
-        const koryeo = files.filter(f => f.name.includes('고려기문학회'));
+        const yeokrywon = files.filter(f => f.name.includes('도서출판역리원')).sort((a,b) => getVer(a.name) - getVer(b.name));
+        const koryeo = files.filter(f => f.name.includes('고려기문학회')).sort((a,b) => getVer(a.name) - getVer(b.name));
 
         function getVersion(name) {
           if (name.includes('_4.')) return '4대';
