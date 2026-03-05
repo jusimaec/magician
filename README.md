@@ -44,7 +44,7 @@ Dropbox 액세스 토큰이 만료되면 아래 절차로 갱신합니다.
 
 ## 🌐 페이지 URL
 
-🔗 [https://jusimaec.github.io/magician-download](https://jusimaec.github.io/magician-download)
+🔗 [https://jusimaec.github.io/magician](https://jusimaec.github.io/magician)
 
 ---
 
