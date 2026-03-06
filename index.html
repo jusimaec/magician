@@ -490,14 +490,21 @@
     }
 
     // ===== Google Drive: 다운로드 =====
-    function downloadGoogle(file) {
+    async function downloadGoogle(file) {
       const btn = document.querySelector(`[data-key="${file.key}"]`);
       if (btn) { btn.textContent = '...'; btn.disabled = true; }
-      const a = document.createElement('a');
-      a.href = `https://www.googleapis.com/drive/v3/files/${file.id}?alt=media&key=${GOOGLE_API_KEY}`;
-      a.download = file.name;
-      document.body.appendChild(a); a.click(); document.body.removeChild(a);
-      setTimeout(() => { if (btn) { btn.textContent = 'DOWNLOAD'; btn.disabled = false; } }, 2000);
+      try {
+        const res = await fetch(`https://www.googleapis.com/drive/v3/files/${file.id}?alt=media&key=${GOOGLE_API_KEY}`);
+        if (!res.ok) throw new Error('다운로드 실패');
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = file.name;
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      } catch (err) { alert('다운로드 오류: ' + err.message); }
+      finally { if (btn) { btn.textContent = 'DOWNLOAD'; btn.disabled = false; } }
     }
 
     // ===== Google Drive 불러오기 (버튼용) =====
