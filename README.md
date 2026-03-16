@@ -4,14 +4,7 @@
 
 ---
 
-## 📁 파일 관리 방법
-
-파일은 **Dropbox 앱 폴더**에서 관리합니다.
-
-- Dropbox 앱 폴더 경로: `앱/magician-download`
-- 파일을 추가/삭제하면 다운로드 페이지에 **자동으로 반영**됩니다.
-
-### 파일명 규칙 (반드시 지켜주세요)
+## 📁 파일 규칙
 
 파일명에 아래 키워드가 포함되어야 자동 분류됩니다.
 
@@ -28,19 +21,6 @@
 時空術Magician_4.2(고려기문학회).zip
 ```
 
----
-
-## 🔑 토큰 갱신 방법
-
-Dropbox 액세스 토큰이 만료되면 아래 절차로 갱신합니다.
-
-1. [Dropbox 개발자 콘솔](https://www.dropbox.com/developers/apps) 접속
-2. `magician-download` 앱 클릭
-3. **Settings** 탭 → **Generated access token** → **Generate** 클릭
-4. 새 토큰 복사
-5. `index.html` 파일에서 `ACCESS_TOKEN` 값 교체 후 커밋
-
----
 
 ## 🌐 페이지 URL
 
