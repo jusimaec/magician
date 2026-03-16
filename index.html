@@ -148,6 +148,56 @@
       font-size: 16px;
     }
 
+    .section-divider {
+      width: 380px;
+      gap: 18px;
+      margin: 26px auto 58px;
+      opacity: 0.92;
+    }
+
+    .section-divider::before,
+    .section-divider::after {
+      height: 2px;
+      background: linear-gradient(to right, transparent, rgba(201,168,76,0.28), var(--gold));
+    }
+
+    .section-divider::after {
+      background: linear-gradient(to left, transparent, rgba(201,168,76,0.28), var(--gold));
+    }
+
+    .section-divider span {
+      font-size: 14px;
+      letter-spacing: 0.1em;
+      text-shadow: 0 0 14px rgba(201,168,76,0.42);
+      transform: translateY(-1px);
+    }
+
+    .access-divider {
+      width: 460px;
+      gap: 16px;
+      margin: 38px auto 74px;
+      opacity: 0.98;
+    }
+
+    .access-divider::before,
+    .access-divider::after {
+      height: 0;
+      border-top: 2px dashed rgba(79,181,167,0.72);
+      background: none;
+    }
+
+    .access-divider span {
+      color: #9ee9df;
+      font-size: 11px;
+      letter-spacing: 0.22em;
+      padding: 5px 14px;
+      border: 1px solid rgba(79,181,167,0.9);
+      border-radius: 999px;
+      background: rgba(79,181,167,0.12);
+      text-shadow: 0 0 12px rgba(79,181,167,0.45);
+      transform: translateY(0);
+    }
+
     /* File list */
     #file-list {
       display: flex;
@@ -306,6 +356,45 @@
       letter-spacing: 0.05em;
     }
 
+    .section-title-access {
+      border-color: #4fb5a7;
+      background: rgba(79,181,167,0.08);
+      box-shadow: inset 0 0 20px rgba(79,181,167,0.08), 0 0 20px rgba(79,181,167,0.12);
+      color: #9ee9df;
+    }
+
+    .section-title-access .access-note {
+      font-size: 0.6em;
+      font-weight: 600;
+      opacity: 0.95;
+    }
+
+    .section-access .file-name,
+    .section-access .file-size,
+    .section-access .version-label {
+      color: #9ee9df;
+    }
+
+    .section-access .download-btn {
+      border-color: #4fb5a7;
+      color: #9ee9df;
+    }
+
+    .section-access .download-btn:hover {
+      background: #4fb5a7;
+      color: #0a0a0f;
+      box-shadow: 0 0 16px rgba(79,181,167,0.4);
+    }
+
+    .section-access .file-card:hover {
+      border-color: rgba(79,181,167,0.6);
+      box-shadow: 0 4px 24px rgba(20,130,120,0.28);
+    }
+
+    .section-access .file-card::before {
+      background: linear-gradient(to bottom, #4fb5a7, transparent);
+    }
+
     .version-label {
       font-size: 16px;
       font-weight: 700;
@@ -376,6 +465,11 @@
       return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
     }
 
+    function hasAccessDatabaseEngine(name) {
+      // File name contains AccessDatabaseEngine anywhere, regardless of case.
+      return /accessdatabaseengine/i.test(name);
+    }
+
     // ===== Dropbox: 토큰 갱신 =====
     async function getAccessToken() {
       const res = await fetch('https://api.dropbox.com/oauth2/token', {
@@ -421,21 +515,29 @@
 
     // ===== 공통: 파일 렌더링 =====
     function renderFiles(container, files, downloadFn) {
-      const yeokrywon = files.filter(f => f.name.includes('도서출판역리원')).sort((a,b) => getVer(a.name) - getVer(b.name));
-      const koryeo = files.filter(f => f.name.includes('고려기문학회')).sort((a,b) => getVer(a.name) - getVer(b.name));
+      const accessDb = files.filter(f => hasAccessDatabaseEngine(f.name)).sort((a,b) => getVer(a.name) - getVer(b.name));
+      const yeokrywon = files.filter(f => f.name.includes('도서출판역리원') && !hasAccessDatabaseEngine(f.name)).sort((a,b) => getVer(a.name) - getVer(b.name));
+      const koryeo = files.filter(f => f.name.includes('고려기문학회') && !hasAccessDatabaseEngine(f.name)).sort((a,b) => getVer(a.name) - getVer(b.name));
 
-      function renderSection(title, fileList, startIdx) {
+      function renderSection(title, fileList, startIdx, titleClass = '', splitByVersion = true) {
         if (fileList.length === 0) return;
         const section = document.createElement('div');
         section.className = 'section';
-        section.innerHTML = `<div class="section-title">${title}</div>`;
-        const v3 = fileList.filter(f => f.name.includes('_3.'));
-        const v4 = fileList.filter(f => f.name.includes('_4.'));
+        if (titleClass === 'section-title-access') {
+          section.classList.add('section-access');
+        }
+        const titleClasses = ['section-title', titleClass].filter(Boolean).join(' ');
+        section.innerHTML = `<div class="${titleClasses}">${title}</div>`;
+        const v3 = splitByVersion ? fileList.filter(f => f.name.includes('_3.')) : [];
+        const v4 = splitByVersion ? fileList.filter(f => f.name.includes('_4.')) : [];
+        const others = splitByVersion ? fileList.filter(f => !f.name.includes('_3.') && !f.name.includes('_4.')) : fileList;
 
         function renderGroup(label, group, offset) {
           if (group.length === 0) return;
           const groupDiv = document.createElement('div');
-          groupDiv.innerHTML = `<div class="version-label">${label}</div>`;
+          if (label) {
+            groupDiv.innerHTML = `<div class="version-label">${label}</div>`;
+          }
           group.forEach((file, i) => {
             const card = document.createElement('div');
             card.className = 'file-card';
@@ -453,19 +555,45 @@
           section.appendChild(groupDiv);
         }
 
-        renderGroup('일반 버전 (ver.3)', v3, startIdx);
-        renderGroup('프로 버전 (ver.4)', v4, startIdx + v3.length);
+        if (splitByVersion) {
+          renderGroup('일반 버전 (ver.3)', v3, startIdx);
+          renderGroup('프로 버전 (ver.4)', v4, startIdx + v3.length);
+        } else {
+          renderGroup('', others, startIdx);
+        }
         container.appendChild(section);
       }
 
       container.innerHTML = '';
-      renderSection('도서출판 역리원', yeokrywon, 0);
+      let fileOffset = 0;
+      let sectionCount = 0;
+
+      if (yeokrywon.length > 0) {
+        renderSection('도서출판 역리원', yeokrywon, fileOffset);
+        fileOffset += yeokrywon.length;
+        sectionCount += 1;
+      }
+
       if (koryeo.length > 0) {
-        const divider = document.createElement('div');
-        divider.className = 'divider';
-        divider.innerHTML = '<span>✦</span>';
-        container.appendChild(divider);
-        renderSection('고려기문학회', koryeo, yeokrywon.length);
+        if (sectionCount > 0) {
+          const divider = document.createElement('div');
+            divider.className = 'divider section-divider';
+            divider.innerHTML = '<span>◆</span>';
+          container.appendChild(divider);
+        }
+        renderSection('고려기문학회', koryeo, fileOffset);
+        fileOffset += koryeo.length;
+        sectionCount += 1;
+      }
+
+      if (accessDb.length > 0) {
+        if (sectionCount > 0) {
+          const divider = document.createElement('div');
+            divider.className = 'divider access-divider';
+            divider.innerHTML = '<span>ENGINE</span>';
+          container.appendChild(divider);
+        }
+        renderSection('고객관리 구동 Engine<span class="access-note">(고객관리 오류시 설치)</span>', accessDb, fileOffset, 'section-title-access', false);
       }
     }
 
