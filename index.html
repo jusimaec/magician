@@ -667,24 +667,37 @@
       }
     }
 
-    async function downloadDropbox(file) {
-      const btn = document.querySelector(`[data-key="${file.key}"]`);
-      if (btn) { btn.textContent = '...'; btn.disabled = true; }
-      try {
+async function downloadDropbox(file) {
+    const btn = document.querySelector(`[data-key="${file.key}"]`);
+    if (btn) { btn.textContent = '...'; btn.disabled = true; }
+    try {
         await getAccessToken();
         const res = await fetch('https://api.dropboxapi.com/2/files/get_temporary_link', {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ path: file.path_lower })
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ path: file.path_lower })
         });
         if (!res.ok) throw new Error('링크 생성 실패');
         const data = await res.json();
+
+        // [중요 수정] 단순 링크 이동이 아닌 Blob 다운로드 방식으로 변경
+        const fileRes = await fetch(data.link);
+        const blob = await fileRes.blob();
+        const url = URL.createObjectURL(blob);
+        
         const a = document.createElement('a');
-        a.href = data.link; a.download = file.name;
-        document.body.appendChild(a); a.click(); document.body.removeChild(a);
-      } catch (err) { alert('다운로드 오류: ' + err.message); }
-      finally { if (btn) { btn.textContent = 'DOWNLOAD'; btn.disabled = false; } }
+        a.href = url; 
+        a.download = file.name;
+        document.body.appendChild(a); 
+        a.click(); 
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url); // 메모리 해제
+    } catch (err) { 
+        alert('다운로드 오류: ' + err.message); 
+    } finally { 
+        if (btn) { btn.textContent = 'DOWNLOAD'; btn.disabled = false; } 
     }
+}
 
     async function downloadGoogle(file) {
       const btn = document.querySelector(`[data-key="${file.key}"]`);
