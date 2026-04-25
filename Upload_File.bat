@@ -257,7 +257,7 @@ echo.
 
 REM 원격 저장소의 최신 변경사항 가져오기
 echo [원격 저장소에서 최신 변경사항 가져오는 중...]
-git pull --allow-unrelated-histories origin !CURRENT_BRANCH! 2>nul
+git pull --allow-unrelated-histories --no-edit origin !CURRENT_BRANCH! 2>nul
 echo.
 
 REM 현재 브랜치 푸시
