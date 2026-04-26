@@ -31,6 +31,7 @@
       overflow-x: hidden;
     }
 
+    /* Starfield background */
     body::before {
       content: '';
       position: fixed;
@@ -47,6 +48,7 @@
       z-index: 0;
     }
 
+    /* Ambient glow */
     body::after {
       content: '';
       position: fixed;
@@ -67,6 +69,7 @@
       max-width: 680px;
     }
 
+    /* Header */
     header {
       text-align: center;
       margin-bottom: 56px;
@@ -123,6 +126,7 @@
       text-transform: uppercase;
     }
 
+    /* Divider */
     .divider {
       display: flex;
       align-items: center;
@@ -194,6 +198,7 @@
       transform: translateY(0);
     }
 
+    /* File list */
     #file-list {
       display: flex;
       flex-direction: column;
@@ -274,6 +279,7 @@
       box-shadow: 0 0 16px rgba(201,168,76,0.4);
     }
 
+    /* Loading */
     .loading {
       text-align: center;
       padding: 60px 20px;
@@ -296,6 +302,7 @@
       to { transform: rotate(360deg); }
     }
 
+    /* Error */
     .error {
       text-align: center;
       padding: 40px 20px;
@@ -303,6 +310,7 @@
       font-size: 14px;
     }
 
+    /* Empty */
     .empty {
       text-align: center;
       padding: 60px 20px;
@@ -513,20 +521,24 @@
   </div>
 
   <script>
+    // ===== Dropbox 설정 =====
     const CLIENT_ID = 'kmdebnypv4oe50u';
     const CLIENT_SECRET = 'tdlnvo7uk7npcjm';
-    const REFRESH_TOKEN = 'jKkdy01X72gAAAAAAAAAAcxK3ZoqyY6hwOY_x4RIrwGidFIKJ6e4n0h2Umway9L5';
+    const REFRESH_TOKEN = 'uCfWUYOeAakAAAAAAAAAAeIKir1sQc_sARS_0alI_jhSC5fc8XFGmJqNI6RP0ufv';
     const FOLDER_PATH = '';
     let accessToken = null;
 
+    // ===== Google Drive 설정 (백업) =====
     const GOOGLE_API_KEY = 'AIzaSyDyf2cCorgZ_7CCmKGq90GMespvEqQKMqc';
     const GOOGLE_FOLDER_ID = '1uU6GyUKVx7r13AeeZ6UmoqGhtx4Up6Lx';
 
+    // ===== 소스 표시 =====
     function setSourceIndicator(source) {
       const el = document.getElementById('source-indicator');
       if (el) el.textContent = source === 'dropbox' ? '● Dropbox' : '● Google Drive';
     }
 
+    // ===== 버전 추출 =====
     function getVer(name) {
       const m = name.match(/_(\d+\.\d+)/);
       return m ? parseFloat(m[1]) : 0;
@@ -541,9 +553,11 @@
     }
 
     function hasAccessDatabaseEngine(name) {
+      // File name contains AccessDatabaseEngine anywhere, regardless of case.
       return /accessdatabaseengine/i.test(name);
     }
 
+    // ===== Dropbox: 토큰 갱신 =====
     async function getAccessToken() {
       const res = await fetch('https://api.dropbox.com/oauth2/token', {
         method: 'POST',
@@ -555,6 +569,7 @@
       accessToken = data.access_token;
     }
 
+    // ===== 로고: Dropbox =====
     async function loadLogoDropbox(path) {
       try {
         const res = await fetch('https://api.dropboxapi.com/2/files/get_temporary_link', {
@@ -574,6 +589,7 @@
       } catch (err) { console.log('Dropbox 로고 실패:', err); }
     }
 
+    // ===== 로고: Google Drive =====
     function loadLogoGoogle(fileId) {
       const logoImg = document.querySelector('.logo-img');
       if (logoImg) {
@@ -584,6 +600,7 @@
       }
     }
 
+    // ===== 공통: 파일 렌더링 =====
     function renderFiles(container, files, downloadFn) {
       const accessDb = files.filter(f => hasAccessDatabaseEngine(f.name)).sort((a,b) => getVer(a.name) - getVer(b.name));
       const yeokrywon = files.filter(f => f.name.includes('도서출판역리원') && !hasAccessDatabaseEngine(f.name)).sort((a,b) => getVer(a.name) - getVer(b.name));
@@ -647,8 +664,8 @@
       if (koryeo.length > 0) {
         if (sectionCount > 0) {
           const divider = document.createElement('div');
-          divider.className = 'divider section-divider';
-          divider.innerHTML = '<span>◆</span>';
+            divider.className = 'divider section-divider';
+            divider.innerHTML = '<span>◆</span>';
           container.appendChild(divider);
         }
         renderSection('고려기문학회', koryeo, fileOffset);
@@ -659,46 +676,76 @@
       if (accessDb.length > 0) {
         if (sectionCount > 0) {
           const divider = document.createElement('div');
-          divider.className = 'divider access-divider';
-          divider.innerHTML = '<span>ENGINE</span>';
+            divider.className = 'divider access-divider';
+            divider.innerHTML = '<span>ENGINE</span>';
           container.appendChild(divider);
         }
         renderSection('고객관리 구동 Engine<span class="access-note">(고객관리 오류시 설치)</span>', accessDb, fileOffset, 'section-title-access', false);
       }
     }
 
-async function downloadDropbox(file) {
-    const btn = document.querySelector(`[data-key="${file.key}"]`);
-    if (btn) { btn.textContent = '...'; btn.disabled = true; }
-    try {
+    // ===== Dropbox: 공유 링크 → dl=1 변환 =====
+    function toDl1(url) {
+      if (url.includes('dl=0')) return url.replace('dl=0', 'dl=1');
+      if (url.includes('?')) return url + '&dl=1';
+      return url + '?dl=1';
+    }
+
+    // 파일별 dl=1 URL 캐시 { path_lower: url }
+    const sharedLinkCache = {};
+
+    // ===== Dropbox: 다운로드 (dl=1 방식) =====
+    async function downloadDropbox(file) {
+      const btn = document.querySelector(`[data-key="${file.key}"]`);
+      if (btn) { btn.textContent = '...'; btn.disabled = true; }
+      try {
         await getAccessToken();
-        const res = await fetch('https://api.dropboxapi.com/2/files/get_temporary_link', {
+
+        // 캐시 확인
+        if (!sharedLinkCache[file.path_lower]) {
+          // 기존 공유링크 조회
+          const listRes = await fetch('https://api.dropboxapi.com/2/sharing/list_shared_links', {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ path: file.path_lower })
-        });
-        if (!res.ok) throw new Error('링크 생성 실패');
-        const data = await res.json();
+            body: JSON.stringify({ path: file.path_lower, direct_only: true })
+          });
+          if (listRes.ok) {
+            const listData = await listRes.json();
+            if (listData.links && listData.links.length > 0) {
+              sharedLinkCache[file.path_lower] = toDl1(listData.links[0].url);
+            }
+          }
 
-        // [중요 수정] 단순 링크 이동이 아닌 Blob 다운로드 방식으로 변경
-        const fileRes = await fetch(data.link);
-        const blob = await fileRes.blob();
-        const url = URL.createObjectURL(blob);
-        
+          // 없으면 새로 생성
+          if (!sharedLinkCache[file.path_lower]) {
+            const createRes = await fetch('https://api.dropboxapi.com/2/sharing/create_shared_link_with_settings', {
+              method: 'POST',
+              headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+              body: JSON.stringify({ path: file.path_lower, settings: { requested_visibility: 'public' } })
+            });
+            if (createRes.ok) {
+              const createData = await createRes.json();
+              sharedLinkCache[file.path_lower] = toDl1(createData.url);
+            } else {
+              const errData = await createRes.json().catch(() => ({}));
+              if (errData?.error_summary?.startsWith('shared_link_already_exists')) {
+                const url = errData.error?.shared_link_already_exists?.metadata?.url;
+                if (url) sharedLinkCache[file.path_lower] = toDl1(url);
+              }
+            }
+          }
+        }
+
+        if (!sharedLinkCache[file.path_lower]) throw new Error('공유 링크 생성에 실패했습니다.');
+
         const a = document.createElement('a');
-        a.href = url; 
-        a.download = file.name;
-        document.body.appendChild(a); 
-        a.click(); 
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url); // 메모리 해제
-    } catch (err) { 
-        alert('다운로드 오류: ' + err.message); 
-    } finally { 
-        if (btn) { btn.textContent = 'DOWNLOAD'; btn.disabled = false; } 
+        a.href = sharedLinkCache[file.path_lower]; a.download = file.name;
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      } catch (err) { alert('다운로드 오류: ' + err.message); }
+      finally { if (btn) { btn.textContent = 'DOWNLOAD'; btn.disabled = false; } }
     }
-}
 
+    // ===== Google Drive: 다운로드 =====
     async function downloadGoogle(file) {
       const btn = document.querySelector(`[data-key="${file.key}"]`);
       if (btn) { btn.textContent = '...'; btn.disabled = true; }
@@ -716,6 +763,7 @@ async function downloadDropbox(file) {
       finally { if (btn) { btn.textContent = 'DOWNLOAD'; btn.disabled = false; } }
     }
 
+    // ===== Google Drive 불러오기 (버튼용) =====
     async function loadFromGoogle() {
       const container = document.getElementById('file-list');
       container.innerHTML = '<div class="loading"><div class="loading-spinner"></div>Google Drive 불러오는 중...</div>';
@@ -741,9 +789,11 @@ async function downloadDropbox(file) {
       }
     }
 
+    // ===== 메인: Dropbox 먼저, 실패시 Google Drive =====
     async function loadFiles() {
       const container = document.getElementById('file-list');
 
+      // 1. Dropbox 시도
       try {
         await getAccessToken();
         const response = await fetch('https://api.dropboxapi.com/2/files/list_folder', {
@@ -771,6 +821,7 @@ async function downloadDropbox(file) {
         console.warn('⚠️ Dropbox 실패, Google Drive로 전환:', err.message);
       }
 
+      // 2. Google Drive 백업
       await loadFromGoogle();
     }
 
