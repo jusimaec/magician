@@ -521,16 +521,29 @@
   </div>
 
   <script>
-    // ===== Dropbox 설정 =====
-    const CLIENT_ID = 'kmdebnypv4oe50u';
-    const CLIENT_SECRET = 'tdlnvo7uk7npcjm';
-    const REFRESH_TOKEN = 'uCfWUYOeAakAAAAAAAAAAeIKir1sQc_sARS_0alI_jhSC5fc8XFGmJqNI6RP0ufv';
-    const FOLDER_PATH = '';
+    // ===== 설정값 (같은 폴더의 config.json에서 읽어옴) =====
+    // MFC 등 다른 프로그램에서도 이 config.json을 그대로 읽으므로 순수 JSON 형식을 유지함
+    // 키가 바뀌어도 이 파일 자체는 수정할 필요 없이, config.json 내용만 갱신하면 됨
+    let CLIENT_ID, CLIENT_SECRET, REFRESH_TOKEN, FOLDER_PATH;
+    let GOOGLE_API_KEY, GOOGLE_FOLDER_ID;
     let accessToken = null;
 
-    // ===== Google Drive 설정 (백업) =====
-    const GOOGLE_API_KEY = 'AIzaSyDyf2cCorgZ_7CCmKGq90GMespvEqQKMqc';
-    const GOOGLE_FOLDER_ID = '1uU6GyUKVx7r13AeeZ6UmoqGhtx4Up6Lx';
+    async function loadConfig() {
+      const res = await fetch('config.json', { cache: 'no-store' });
+      if (!res.ok) throw new Error(`config.json 로드 실패 (${res.status})`);
+      const cfg = await res.json();
+
+      CLIENT_ID = cfg.dropbox_client_id;
+      CLIENT_SECRET = cfg.dropbox_client_secret;
+      REFRESH_TOKEN = cfg.dropbox_refresh_token;
+      FOLDER_PATH = cfg.folder_path || '';
+      GOOGLE_API_KEY = cfg.google_api_key;
+      GOOGLE_FOLDER_ID = cfg.google_folder_id;
+
+      if (!CLIENT_ID || !CLIENT_SECRET || !REFRESH_TOKEN) {
+        throw new Error('config.json에 dropbox_client_id/dropbox_client_secret/dropbox_refresh_token 값이 없습니다.');
+      }
+    }
 
     // ===== 소스 표시 =====
     function setSourceIndicator(source) {
@@ -825,7 +838,16 @@
       await loadFromGoogle();
     }
 
-    loadFiles();
+    // ===== 시작점: config.json 로드 후 파일 목록 불러오기 =====
+    (async function init() {
+      const container = document.getElementById('file-list');
+      try {
+        await loadConfig();
+        loadFiles();
+      } catch (err) {
+        container.innerHTML = `<div class="error">⚠️ 설정 파일을 불러오지 못했습니다.<br><small>${err.message}</small></div>`;
+      }
+    })();
   </script>
   <div id="source-indicator" style="position:fixed; bottom:10px; right:12px; font-size:11px; color:#c9a84c; letter-spacing:0.08em; z-index:999;"></div>
 </body>
