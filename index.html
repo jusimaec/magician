@@ -570,6 +570,7 @@
       return /accessdatabaseengine/i.test(name);
     }
 
+
     // ===== Dropbox: 토큰 갱신 =====
     async function getAccessToken() {
       const res = await fetch('https://api.dropbox.com/oauth2/token', {
@@ -616,7 +617,7 @@
     // ===== 공통: 파일 렌더링 =====
     function renderFiles(container, files, downloadFn) {
       const accessDb = files.filter(f => hasAccessDatabaseEngine(f.name)).sort((a,b) => getVer(a.name) - getVer(b.name));
-      const yeokrywon = files.filter(f => f.name.includes('도서출판역리원') && !hasAccessDatabaseEngine(f.name)).sort((a,b) => getVer(a.name) - getVer(b.name));
+      const yeokrywon = files.filter(f => /도서출판\s*역리원/.test(f.name) && !hasAccessDatabaseEngine(f.name)).sort((a,b) => getVer(a.name) - getVer(b.name));
       const koryeo = files.filter(f => f.name.includes('고려기문학회') && !hasAccessDatabaseEngine(f.name)).sort((a,b) => getVer(a.name) - getVer(b.name));
 
       function renderSection(title, fileList, startIdx, titleClass = '', splitByVersion = true) {
